@@ -85,3 +85,20 @@ WHERE years IS NOT NULL
 SELECT *
 FROM company_ranking
 WHERE ranking <= 5 ;
+
+-- Which top five industries were hit per year? 
+WITH industry_year (industry, years, total_laid_off) AS
+(
+SELECT industry, YEAR(`date`), SUM(total_laid_off)
+FROM layoffs_staging2
+GROUP BY industry, YEAR(`date`)
+),
+industry_ranking AS
+(
+SELECT *, DENSE_RANK() OVER (PARTITION BY years ORDER BY total_laid_off DESC) AS ranking
+FROM industry_year
+WHERE years IS NOT NULL
+)
+SELECT *
+FROM industry_ranking
+WHERE ranking <= 5 ;
